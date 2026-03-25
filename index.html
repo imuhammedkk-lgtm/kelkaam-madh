@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ml">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>      Kelkaam mdh | Spotify Premium</title>
+
+   <!-- Firebase SDK (Compatibility Mode) -->
+   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+   <!-- Custom CSS -->
+   <link rel="stylesheet" href="mdh.css">
+   <link href="https://fonts.googleapis.com/css?family=Bitter:400,700&display=swap&subset=latin-ext" rel="stylesheet" />
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+
+   <!-- Firebase Initialization -->
+   <script>
+      const firebaseConfig = {
+         apiKey: "YOUR_API_KEY",
+         authDomain: "YOUR_PROJECT.firebaseapp.com",
+         projectId: "YOUR_PROJECT_ID",
+         storageBucket: "YOUR_PROJECT.appspot.com",
+         messagingSenderId: "XXXXXX",
+         appId: "APP_ID"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+   </script>
+</head>
+
+<body>
+   <div class="app-container">
+
+      <!-- Navigation Bar -->
+      <div class="nav-bar">
+         <button id="premiumBtn" class="premium-nav-btn" onclick="showStep('stepPremium')">+</button>
+         <button id="historyNavBtn" class="history-nav-btn" onclick="showHistory()">HISTORY</button>
+         <button id="homeBtn" class="home-btn" onclick="goHome()">HOME</button>
+      </div>
+
+      <!-- Magic Floating Navigation (Visible after login) -->
+      <div class="navigation" id="magicNav">
+         <ul>
+            <li class="list active" onclick="showStep('step1')">
+               <a href="#">
+                  <span class="icon"><ion-icon name="home-outline"></ion-icon></span>
+                  <span class="text">Home</span>
+               </a>
+            </li>
+            <li class="list" onclick="showHistory()">
+               <a href="#">
+                  <span class="icon"><ion-icon name="time-outline"></ion-icon></span>
+                  <span class="text">History</span>
+               </a>
+            </li>
+            <li class="list" onclick="showStep('step2')">
+               <a href="#">
+                  <span class="icon"><ion-icon name="search-outline"></ion-icon></span>
+                  <span class="text">Search</span>
+               </a>
+            </li>
+            <li class="list" onclick="showStep('step3')">
+               <a href="#">
+                  <span class="icon"><ion-icon name="musical-notes-outline"></ion-icon></span>
+                  <span class="text">Player</span>
+               </a>
+            </li>
+            <li class="list" onclick="showStep('stepPremium')">
+               <a href="#">
+                  <span class="icon"><ion-icon name="star-outline"></ion-icon></span>
+                  <span class="text">Premium</span>
+               </a>
+            </li>
+            <div class="indicator"></div>
+         </ul>
+      </div>
+
+
+      <!-- STEP 0: LOGIN -->
+      <div id="step0" class="step active">
+         <div class="login-wrapper">
+            <div class="login-box">
+               <form onsubmit="event.preventDefault(); validateUser();">
+                  <h1 style="margin-bottom: 5px; font-size: 42px; text-transform: uppercase; letter-spacing: 2px;">kelkaam mdh</h1>
+                  <h2 style="margin-bottom: 25px; margin-top: 0; font-size: 1.5em; color: #b3b3b3;">Login</h2>
+                  <div class="input-box">
+                     <span class="icon"><ion-icon name="mail"></ion-icon></span>
+                     <input type="email" required>
+                     <label>Email / ഇമെയിൽ</label>
+                  </div>
+                  <div class="input-box">
+                     <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                     <input type="password" required>
+                     <label>Password / പാസ്‌വേഡ്</label>
+                  </div>
+                  <div class="remember-forgot">
+                     <label><input type="checkbox"> Remember me</label>
+                     <a href="#">Forgot Password?</a>
+                  </div>
+                  <button type="submit" class="login-btn-final">Login</button>
+                  <div class="register-link">
+                     <p>Don't have an account? <a href="#">Register</a></p>
+                  </div>
+                  <div style="text-align:center; margin-top: 14px;">
+                     <button onclick="openParallax()" type="button"
+                        style="background: linear-gradient(135deg, #6a11cb, #fc5c7d); color: #fff; border: none; border-radius: 20px; padding: 10px 28px; font-size: 15px; font-weight: 800; cursor: pointer; letter-spacing: 1px; box-shadow: 0 4px 18px rgba(106,17,203,0.45); transition: transform 0.2s;"
+                        onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">🌄
+                        Parallax</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+
+      <!-- STEP 1: SINGER SELECTION -->
+      <div id="step1" class="step">
+         <p id="instructionTxt" style="text-align: center; color: #b3b3b3; margin-bottom: 15px;">ഗായകനെ തിരഞ്ഞെടുക്കുക
+         </p>
+         <div id="singerList">
+            <!-- Dynamic Singer Cards -->
+            <div class="singer-card" onclick="selectSinger(this, 'Thwaha Thangal')">
+               <img src="https://i.postimg.cc/yNm6B5Vb/download-(3).jpg">
+               <div class="singer-name">Thwaha Thangal</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Shahin Babu')">
+               <img src="https://i.postimg.cc/zXHr8M77/download-(5).jpg">
+               <div class="singer-name">Shahin Babu</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Nasif Calicut')">
+               <img src="https://i.postimg.cc/pXRfHbPL/images.jpg">
+               <div class="singer-name">Nasif Calicut</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Azhar Kallur')">
+               <img src="https://i.postimg.cc/PJB0CXym/download-(4).jpg">
+               <div class="singer-name">Azhar Kallur</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Mahfooz Raihan')">
+               <img src="https://i.postimg.cc/G2k47QgG/images-(3).jpg">
+               <div class="singer-name">Mahfooz Raihan</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Nasif Mon')">
+               <img src="https://i.postimg.cc/MKZn517L/download-(6).jpg">
+               <div class="singer-name">Nasif Mon</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Samad Saqafi')">
+               <img src="https://i.postimg.cc/gjgkQBVn/download-(7).jpg">
+               <div class="singer-name">Samad Saqafi</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Rahoof Akode')">
+               <img src="https://i.postimg.cc/BnLQ7pX5/download-(8).jpg">
+               <div class="singer-name">Rahoof Akode</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Mubashir Perinthattiri')">
+               <img src="https://i.postimg.cc/ZKgJNNVz/download-(9).jpg">
+               <div class="singer-name">Mubashir Perinthattiri</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Ashad Pookkottur')">
+               <img src="https://i.postimg.cc/brrjDYn0/images-(2).jpg">
+               <div class="singer-name">Ashad Pookkottur</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Hafiz Swadiq Ali Fazili')">
+               <img src="https://i.postimg.cc/TPc8t5q1/images-(1).jpg">
+               <div class="singer-name">Hafiz Swadiq Ali Fazili</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Murshid Elayoor')">
+               <img src="https://i.postimg.cc/x1KBdNZs/download-(10).jpg">
+               <div class="singer-name">Murshid Elayoor</div>
+            </div>
+            <div class="singer-card" onclick="selectSinger(this, 'Hafiz Jabir Omassery')">
+               <img src="https://i.postimg.cc/6qD2MpCD/download-(11).jpg">
+               <div class="singer-name">Hafiz Jabir Omassery</div>
+            </div>
+         </div>
+         <button id="nextBtn" class="footer-btn" onclick="toStep2()">Next</button>
+      </div>
+
+      <!-- STEP 2: SONG LIST -->
+      <div id="step2" class="step">
+         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <button class="ctrl-btn" onclick="showStep('step1')"
+               style="font-size: 14px; width: auto; padding: 0 15px; border-radius: 20px;">← Back</button>
+            <h2 id="currentSingerTitle" style="font-size: 20px; color: var(--spotify-green); margin: 0;"></h2>
+         </div>
+         <input type="text" id="songSearch" class="search-input" placeholder="പാട്ടുകൾ തിരയുക..."
+            onkeyup="filterSongs()">
+         <div id="songDisplayList"></div>
+      </div>
+
+      <!-- STEP 3: PLAYER (NEW MODEL) -->
+      <div id="step3" class="step">
+         <div class="player-page">
+            <div class="wrapper" id="app">
+               <div class="player">
+                  <div class="player__top">
+                     <div class="player-cover">
+                        <transition-group :name="transitionName">
+                           <div class="player-cover__item" v-if="index === currentTrackIndex"
+                              :style="{ backgroundImage: 'url(\'' + track.cover + '\')' }" v-for="(track, index) in tracks"
+                              :key="index"></div>
+                        </transition-group>
+                     </div>
+                     <div class="player-controls">
+                        <div class="player-controls__item -favorite" :class="{ active : currentTrack.favorited }"
+                           @click="favorite">
+                           <svg class="icon">
+                              <use xlink:href="#icon-heart-o"></use>
+                           </svg>
+                        </div>
+                        <a :href="currentTrack.url" target="_blank" class="player-controls__item">
+                           <svg class="icon">
+                              <use xlink:href="#icon-link"></use>
+                           </svg>
+                        </a>
+                        <div class="player-controls__item" @click="prevTrack">
+                           <svg class="icon">
+                              <use xlink:href="#icon-prev"></use>
+                           </svg>
+                        </div>
+                        <div class="player-controls__item" @click="nextTrack">
+                           <svg class="icon">
+                              <use xlink:href="#icon-next"></use>
+                           </svg>
+                        </div>
+                        <div class="player-controls__item -xl js-play" @click="play">
+                           <svg class="icon">
+                              <use xlink:href="#icon-pause" v-if="isTimerPlaying"></use>
+                              <use xlink:href="#icon-play" v-else></use>
+                           </svg>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="progress" ref="progress">
+                     <div class="progress__top">
+                        <div class="album-info" v-if="currentTrack">
+                           <div class="album-info__name">{{ currentTrack.artist }}</div>
+                           <div class="album-info__track">{{ currentTrack.name }}</div>
+                        </div>
+                        <div class="progress__duration">{{ duration }}</div>
+                     </div>
+                     <div class="progress__bar" @click="clickProgress">
+                        <div class="progress__current" :style="{ width : barWidth }"></div>
+                     </div>
+                     <div class="progress__time">{{ currentTime }}</div>
+                  </div>
+                  <div v-cloak></div>
+               </div>
+            </div>
+            
+            <!-- LYRICS SECTION -->
+            <div class="lyrics-container" style="margin-top: 20px; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; max-height: 150px; overflow-y: auto;">
+               <h4 style="color: var(--spotify-green); margin-top: 0; text-align: center; font-size: 14px; margin-bottom: 10px;">Lyrics / വരികൾ</h4>
+               <p style="color: #ccc; font-size: 13px; line-height: 1.6; text-align: center; white-space: pre-wrap;">{{ currentTrack ? currentTrack.lyrics : 'വരികൾ ലഭ്യമല്ല...' }}</p>
+            </div>
+         </div>
+
+         <div style="text-align: center; margin-top: 30px;">
+            <button class="footer-btn" style="background: #333; color: white; width: auto; padding: 10px 30px;"
+               onclick="showStep('step2')">← Back to Songs</button>
+         </div>
+      </div>
+
+      <!-- SVG ICONS FOR PLAYER -->
+      <svg xmlns="http://www.w3.org/2000/svg" hidden xmlns:xlink="http://www.w3.org/1999/xlink">
+         <defs>
+            <symbol id="icon-heart-o" viewBox="0 0 32 32">
+               <title>icon-heart-o</title>
+               <path
+                  d="M22.88 1.952c-2.72 0-5.184 1.28-6.88 3.456-1.696-2.176-4.16-3.456-6.88-3.456-4.48 0-9.024 3.648-9.024 10.592 0 7.232 7.776 12.704 15.072 17.248 0.256 0.16 0.544 0.256 0.832 0.256s0.576-0.096 0.832-0.256c7.296-4.544 15.072-10.016 15.072-17.248 0-6.944-4.544-10.592-9.024-10.592zM16 26.56c-4.864-3.072-12.736-8.288-12.736-14.016 0-5.088 3.040-7.424 5.824-7.424 2.368 0 4.384 1.504 5.408 4.032 0.256 0.608 0.832 0.992 1.472 0.992s1.248-0.384 1.472-0.992c1.024-2.528 3.040-4.032 5.408-4.032 2.816 0 5.824 2.304 5.824 7.424 0.064 5.728-7.808 10.976-12.672 14.016z">
+               </path>
+               <path
+                  d="M16 30.144c-0.32 0-0.64-0.096-0.896-0.256-7.296-4.576-15.104-10.048-15.104-17.344 0-7.008 4.576-10.688 9.12-10.688 2.656 0 5.152 1.216 6.88 3.392 1.728-2.144 4.224-3.392 6.88-3.392 4.544 0 9.12 3.68 9.12 10.688 0 7.296-7.808 12.768-15.104 17.344-0.256 0.16-0.576 0.256-0.896 0.256zM9.12 2.048c-4.448 0-8.928 3.616-8.928 10.496 0 7.168 7.744 12.64 15.008 17.152 0.48 0.288 1.12 0.288 1.568 0 7.264-4.544 15.008-9.984 15.008-17.152 0-6.88-4.48-10.496-8.928-10.496-2.656 0-5.088 1.216-6.816 3.392l-0.032 0.128-0.064-0.096c-1.696-2.176-4.192-3.424-6.816-3.424zM16 26.688l-0.064-0.032c-3.808-2.4-12.768-8.032-12.768-14.112 0-5.152 3.072-7.52 5.952-7.52 2.432 0 4.48 1.536 5.504 4.096 0.224 0.576 0.768 0.928 1.376 0.928s1.152-0.384 1.376-0.928c1.024-2.56 3.072-4.096 5.504-4.096 2.848 0 5.952 2.336 5.952 7.52 0 6.080-8.96 11.712-12.768 14.112l-0.064 0.032zM9.12 5.248c-2.752 0-5.728 2.304-5.728 7.328 0 5.952 8.8 11.488 12.608 13.92 3.808-2.4 12.608-7.968 12.608-13.92 0-5.024-2.976-7.328-5.728-7.328-2.336 0-4.32 1.472-5.312 3.968-0.256 0.64-0.864 1.056-1.568 1.056s-1.312-0.416-1.568-1.056c-0.992-2.496-2.976-3.968-5.312-3.968z">
+               </path>
+               <path
+                  d="M6.816 20.704c0.384 0.288 0.512 0.704 0.48 1.12 0.224 0.256 0.384 0.608 0.384 0.96 0 0.032 0 0.032 0 0.064 0.16 0.128 0.32 0.256 0.48 0.384 0.128 0.064 0.256 0.16 0.384 0.256 0.096 0.064 0.192 0.16 0.256 0.224 0.8 0.576 1.632 1.12 2.496 1.664 0.416 0.128 0.8 0.256 1.056 0.32 1.984 0.576 4.064 0.8 6.112 0.928 2.688-1.92 5.312-3.904 8-5.792 0.896-1.088 1.92-2.080 2.912-3.104v-7.552c-0.096-0.128-0.192-0.288-0.32-0.416-0.768-1.024-1.184-2.176-1.6-3.296-0.768-0.416-1.536-0.8-2.336-1.12-0.128-0.064-0.256-0.096-0.384-0.16h-21.568v12.992c1.312 0.672 2.496 1.6 3.648 2.528z">
+               </path>
+            </symbol>
+            <symbol id="icon-heart" viewBox="0 0 32 32">
+               <title>icon-heart</title>
+               <path
+                  d="M22.88 1.952c-2.72 0-5.184 1.28-6.88 3.456-1.696-2.176-4.16-3.456-6.88-3.456-4.48 0-9.024 3.648-9.024 10.592 0 7.232 7.776 12.704 15.072 17.248 0.256 0.16 0.544 0.256 0.832 0.256s0.576-0.096 0.832-0.256c7.296-4.544 15.072-10.016 15.072-17.248 0-6.944-4.544-10.592-9.024-10.592zM16 26.56c-4.864-3.072-12.736-8.288-12.736-14.016 0-5.088 3.040-7.424 5.824-7.424 2.368 0 4.384 1.504 5.408 4.032 0.256 0.608 0.832 0.992 1.472 0.992s1.248-0.384 1.472-0.992c1.024-2.528 3.040-4.032 5.408-4.032 2.816 0 5.824 2.304 5.824 7.424 0.064 5.728-7.808 10.976-12.672 14.016z">
+               </path>
+               <path
+                  d="M16 30.144c-0.32 0-0.64-0.096-0.896-0.256-7.296-4.576-15.104-10.048-15.104-17.344 0-7.008 4.576-10.688 9.12-10.688 2.656 0 5.152 1.216 6.88 3.392 1.728-2.144 4.224-3.392 6.88-3.392 4.544 0 9.12 3.68 9.12 10.688 0 7.296-7.808 12.768-15.104 17.344-0.256 0.16-0.576 0.256-0.896 0.256zM9.12 2.048c-4.448 0-8.928 3.616-8.928 10.496 0 7.168 7.744 12.64 15.008 17.152 0.48 0.288 1.12 0.288 1.568 0 7.264-4.544 15.008-9.984 15.008-17.152 0-6.88-4.48-10.496-8.928-10.496-2.656 0-5.088 1.216-6.816 3.392l-0.032 0.128-0.064-0.096c-1.696-2.176-4.192-3.424-6.816-3.424zM16 26.688l-0.064-0.032c-3.808-2.4-12.768-8.032-12.768-14.112 0-5.152 3.072-7.52 5.952-7.52 2.432 0 4.48 1.536 5.504 4.096 0.224 0.576 0.768 0.928 1.376 0.928s1.152-0.384 1.376-0.928c1.024-2.56 3.072-4.096 5.504-4.096 2.848 0 5.952 2.336 5.952 7.52 0 6.080-8.96 11.712-12.768 14.112l-0.064 0.032zM9.12 5.248c-2.752 0-5.728 2.304-5.728 7.328 0 5.952 8.8 11.488 12.608 13.92 3.808-2.4 12.608-7.968 12.608-13.92 0-5.024-2.976-7.328-5.728-7.328-2.336 0-4.32 1.472-5.312 3.968-0.256 0.64-0.864 1.056-1.568 1.056s-1.312-0.416-1.568-1.056c-0.992-2.496-2.976-3.968-5.312-3.968z">
+               </path>
+            </symbol>
+            <symbol id="icon-infinity" viewBox="0 0 32 32">
+               <title>icon-infinity</title>
+               <path
+                  d="M29.312 20.832c-1.28 1.28-3.008 1.984-4.832 1.984s-3.52-0.704-4.832-1.984c-0.032-0.032-0.224-0.224-0.256-0.256v0 1.28c0 0.448-0.352 0.8-0.8 0.8s-0.8-0.352-0.8-0.8v-3.168c0-0.448 0.352-0.8 0.8-0.8h3.168c0.448 0 0.8 0.352 0.8 0.8s-0.352 0.8-0.8 0.8h-1.28c0.032 0.032 0.224 0.224 0.256 0.256 0.992 0.992 2.304 1.536 3.68 1.536 1.408 0 2.72-0.544 3.68-1.536 0.992-0.992 1.536-2.304 1.536-3.68s-0.544-2.72-1.536-3.68c-0.992-0.992-2.304-1.536-3.68-1.536-1.408 0-2.72 0.544-3.68 1.536l-8.416 8.448c-1.312 1.312-3.072 1.984-4.832 1.984s-3.488-0.672-4.832-1.984c-2.656-2.656-2.656-6.976 0-9.632s6.976-2.656 9.632 0c0.032 0.032 0.16 0.16 0.192 0.192l0.064 0.064v-1.28c0-0.448 0.352-0.8 0.8-0.8s0.8 0.352 0.8 0.8v3.168c0 0.448-0.352 0.8-0.8 0.8h-3.168c-0.448 0-0.8-0.352-0.8-0.8s0.352-0.8 0.8-0.8h1.28l-0.096-0.064c-0.032-0.032-0.16-0.16-0.192-0.192-0.992-0.992-2.304-1.536-3.68-1.536s-2.72 0.544-3.68 1.536c-2.048 2.048-2.048 5.344 0 7.392 0.992 0.992 2.304 1.536 3.68 1.536s2.72-0.544 3.68-1.536l8.512-8.512c1.28-1.28 3.008-1.984 4.832-1.984s3.52 0.704 4.832 1.984c2.624 2.656 2.624 7.008-0.032 9.664z">
+               </path>
+               <path
+                  d="M24.512 23.488c-1.6 0-3.136-0.512-4.416-1.44-0.128 0.704-0.736 1.248-1.44 1.248-0.8 0-1.472-0.672-1.472-1.472v-3.168c0-0.8 0.672-1.472 1.472-1.472h3.168c0.8 0 1.472 0.672 1.472 1.472 0 0.608-0.384 1.152-0.928 1.376 0.64 0.352 1.376 0.544 2.144 0.544 1.216 0 2.368-0.48 3.2-1.344 0.864-0.864 1.344-1.984 1.344-3.2s-0.48-2.368-1.344-3.2c-0.864-0.864-1.984-1.344-3.2-1.344s-2.368 0.48-3.2 1.344l-8.512 8.48c-1.408 1.408-3.296 2.176-5.312 2.176s-3.872-0.768-5.312-2.176c-2.912-2.912-2.912-7.68 0-10.592 1.408-1.408 3.296-2.176 5.312-2.176 0 0 0 0 0 0 1.6 0 3.136 0.512 4.416 1.44 0.128-0.704 0.736-1.248 1.472-1.248 0.8 0 1.472 0.672 1.472 1.472v3.168c0 0.8-0.672 1.472-1.472 1.472h-3.168c-0.8 0-1.472-0.672-1.472-1.472 0-0.608 0.384-1.152 0.928-1.376-0.64-0.352-1.376-0.544-2.144-0.544-1.216 0-2.368 0.48-3.2 1.344-1.76 1.76-1.76 4.64 0 6.432 0.864 0.864 2.016 1.344 3.2 1.344 1.216 0 2.368-0.48 3.2-1.344l8.48-8.544c1.408-1.408 3.296-2.208 5.312-2.208s3.872 0.768 5.312 2.208c1.408 1.408 2.176 3.296 2.176 5.312s-0.768 3.872-2.208 5.312v0c0 0 0 0 0 0-1.408 1.408-3.296 2.176-5.28 2.176zM18.752 18.912l1.44 1.44c1.152 1.152 2.688 1.792 4.32 1.792s3.168-0.64 4.32-1.792v0c1.152-1.152 1.792-2.688 1.792-4.32s-0.64-3.168-1.792-4.32c-1.152-1.152-2.688-1.792-4.352-1.792-1.632 0-3.168 0.64-4.32 1.792l-8.48 8.448c-1.12 1.12-2.592 1.728-4.16 1.728s-3.072-0.608-4.16-1.728c-2.304-2.304-2.304-6.048 0-8.352 1.12-1.12 2.592-1.728 4.16-1.728s3.072 0.608 4.16 1.728l1.44 1.408h-2.912c-0.064 0-0.128 0.064-0.128 0.128s0.064 0.128 0.128 0.128h3.168c0.064 0 0.128-0.064 0.128-0.128v-3.168c0-0.064-0.064-0.128-0.128-0.128s-0.128 0.064-0.128 0.128v2.912l-1.408-1.408c-1.152-1.152-2.688-1.792-4.352-1.792-1.632 0-3.168 0.64-4.32 1.792-2.4 2.4-2.4 6.272 0 8.672 1.152 1.152 2.688 1.792 4.32 1.792s3.168-0.64 4.32-1.792l8.512-8.512c1.12-1.12 2.592-1.728 4.16-1.728s3.072 0.608 4.16 1.728c1.12 1.12 1.728 2.592 1.728 4.16s-0.608 3.072-1.728 4.16c-1.12 1.12-2.592 1.728-4.16 1.728s-3.072-0.608-4.16-1.728l-1.408-1.408h2.912c0.064 0 0.128-0.064 0.128-0.128s-0.064-0.128-0.128-0.128h-3.168c-0.064 0-0.128 0.064-0.128 0.128v3.168c0 0.064 0.064 0.128 0.128 0.128s0.128-0.064 0.128-0.128v-2.88z">
+               </path>
+            </symbol>
+            <symbol id="icon-pause" viewBox="0 0 32 32">
+               <title>icon-pause</title>
+               <path
+                  d="M16 0.32c-8.64 0-15.68 7.040-15.68 15.68s7.040 15.68 15.68 15.68 15.68-7.040 15.68-15.68-7.040-15.68-15.68-15.68zM16 29.216c-7.296 0-13.216-5.92-13.216-13.216s5.92-13.216 13.216-13.216 13.216 5.92 13.216 13.216-5.92 13.216-13.216 13.216z">
+               </path>
+               <path
+                  d="M16 32c-8.832 0-16-7.168-16-16s7.168-16 16-16 16 7.168 16 16-7.168 16-16 16zM16 0.672c-8.448 0-15.328 6.88-15.328 15.328s6.88 15.328 15.328 15.328c8.448 0 15.328-6.88 15.328-15.328s-6.88-15.328-15.328-15.328zM16 29.568c-7.488 0-13.568-6.080-13.568-13.568s6.080-13.568 13.568-13.568c7.488 0 13.568 6.080 13.568 13.568s-6.080 13.568-13.568 13.568zM16 3.104c-7.104 0-12.896 5.792-12.896 12.896s5.792 12.896 12.896 12.896c7.104 0 12.896-5.792 12.896-12.896s-5.792-12.896-12.896-12.896z">
+               </path>
+               <path
+                  d="M12.16 22.336v0c-0.896 0-1.6-0.704-1.6-1.6v-9.472c0-0.896 0.704-1.6 1.6-1.6v0c0.896 0 1.6 0.704 1.6 1.6v9.504c0 0.864-0.704 1.568-1.6 1.568z">
+               </path>
+               <path
+                  d="M19.84 22.336v0c-0.896 0-1.6-0.704-1.6-1.6v-9.472c0-0.896 0.704-1.6 1.6-1.6v0c0.896 0 1.6 0.704 1.6 1.6v9.504c0 0.864-0.704 1.568-1.6 1.568z">
+               </path>
+            </symbol>
+            <symbol id="icon-play" viewBox="0 0 32 32">
+               <title>icon-play</title>
+               <path
+                  d="M21.216 15.168l-7.616-5.088c-0.672-0.416-1.504 0.032-1.504 0.832v10.176c0 0.8 0.896 1.248 1.504 0.832l7.616-5.088c0.576-0.416 0.576-1.248 0-1.664z">
+               </path>
+               <path
+                  d="M13.056 22.4c-0.224 0-0.416-0.064-0.608-0.16-0.448-0.224-0.704-0.672-0.704-1.152v-10.176c0-0.48 0.256-0.928 0.672-1.152s0.928-0.224 1.344 0.064l7.616 5.088c0.384 0.256 0.608 0.672 0.608 1.088s-0.224 0.864-0.608 1.088l-7.616 5.088c-0.192 0.16-0.448 0.224-0.704 0.224zM13.056 10.272c-0.096 0-0.224 0.032-0.32 0.064-0.224 0.128-0.352 0.32-0.352 0.576v10.176c0 0.256 0.128 0.48 0.352 0.576 0.224 0.128 0.448 0.096 0.64-0.032l7.616-5.088c0.192-0.128 0.288-0.32 0.288-0.544s-0.096-0.416-0.288-0.544l-7.584-5.088c-0.096-0.064-0.224-0.096-0.352-0.096z">
+               </path>
+               <path
+                  d="M16 0.32c-8.64 0-15.68 7.040-15.68 15.68s7.040 15.68 15.68 15.68 15.68-7.040 15.68-15.68-7.040-15.68-15.68-15.68zM16 29.216c-7.296 0-13.216-5.92-13.216-13.216s5.92-13.216 13.216-13.216 13.216 5.92 13.216 13.216-5.92 13.216-13.216 13.216z">
+               </path>
+               <path
+                  d="M16 32c-8.832 0-16-7.168-16-16s7.168-16 16-16 16 7.168 16 16-7.168 16-16 16zM16 0.672c-8.448 0-15.328 6.88-15.328 15.328s6.88 15.328 15.328 15.328c8.448 0 15.328-6.88 15.328-15.328s-6.88-15.328-15.328-15.328zM16 29.568c-7.488 0-13.568-6.080-13.568-13.568s6.080-13.568 13.568-13.568c7.488 0 13.568 6.080 13.568 13.568s-6.080 13.568-13.568 13.568zM16 3.104c-7.104 0-12.896 5.792-12.896 12.896s5.792 12.896 12.896 12.896c7.104 0 12.896-5.792 12.896-12.896s-5.792-12.896-12.896-12.896z">
+               </path>
+            </symbol>
+            <symbol id="icon-link" viewBox="0 0 32 32">
+               <title>link</title>
+               <path
+                  d="M23.584 17.92c0 0.864 0 1.728 0 2.56 0 1.312 0 2.656 0 3.968 0 0.352 0.032 0.736-0.032 1.12 0.032-0.16 0.032-0.288 0.064-0.448-0.032 0.224-0.096 0.448-0.16 0.64 0.064-0.128 0.128-0.256 0.16-0.416-0.096 0.192-0.192 0.384-0.32 0.576 0.096-0.128 0.16-0.224 0.256-0.352-0.128 0.16-0.288 0.32-0.48 0.48 0.128-0.096 0.224-0.16 0.352-0.256-0.192 0.128-0.352 0.256-0.576 0.32 0.128-0.064 0.256-0.128 0.416-0.16-0.224 0.096-0.416 0.16-0.64 0.16 0.16-0.032 0.288-0.032 0.448-0.064-0.256 0.032-0.512 0.032-0.768 0.032-0.448 0-0.896 0-1.312 0-1.472 0-2.976 0-4.448 0-1.824 0-3.616 0-5.44 0-1.568 0-3.104 0-4.672 0-0.736 0-1.44 0-2.176 0-0.128 0-0.224 0-0.352-0.032 0.16 0.032 0.288 0.032 0.448 0.064-0.224-0.032-0.448-0.096-0.64-0.16 0.128 0.064 0.256 0.128 0.416 0.16-0.192-0.096-0.384-0.192-0.576-0.32 0.128 0.096 0.224 0.16 0.352 0.256-0.16-0.128-0.32-0.288-0.48-0.48 0.096 0.128 0.16 0.224 0.256 0.352-0.128-0.192-0.256-0.352-0.32-0.576 0.064 0.128 0.128 0.256 0.16 0.416-0.096-0.224-0.16-0.416-0.16-0.64 0.032 0.16 0.032 0.288 0.064 0.448-0.032-0.256-0.032-0.512-0.032-0.768 0-0.448 0-0.896 0-1.312 0-1.472 0-2.976 0-4.448 0-1.824 0-3.616 0-5.44 0-1.568 0-3.104 0-4.672 0-0.736 0-1.44 0-2.176 0-0.128 0-0.224 0.032-0.352-0.032 0.16-0.032 0.288-0.064 0.448 0.032-0.224 0.096-0.448 0.16-0.64-0.064 0.128-0.128 0.256-0.16 0.416 0.096-0.192 0.192-0.384 0.32-0.576-0.096 0.128-0.16 0.224-0.256 0.352 0.128-0.16 0.288-0.32 0.48-0.48-0.128 0.096-0.224 0.16-0.352 0.256 0.192-0.128 0.352-0.256 0.576-0.32-0.128 0.064-0.256 0.128-0.416 0.16 0.224-0.096 0.416-0.16 0.64-0.16-0.16 0.032-0.288 0.032-0.448 0.064 0.48-0.064 0.96-0.032 1.44-0.032 0.992 0 1.952 0 2.944 0 1.216 0 2.432 0 3.616 0 1.056 0 2.112 0 3.168 0 0.512 0 1.024 0 1.536 0 0 0 0 0 0.032 0 0.448 0 0.896-0.192 1.184-0.48s0.512-0.768 0.48-1.184c-0.032-0.448-0.16-0.896-0.48-1.184s-0.736-0.48-1.184-0.48c-0.64 0-1.28 0-1.92 0-1.408 0-2.816 0-4.224 0-1.44 0-2.848 0-4.256 0-0.672 0-1.344 0-2.016 0-0.736 0-1.472 0.192-2.112 0.576s-1.216 0.96-1.568 1.6c-0.384 0.64-0.544 1.376-0.544 2.144 0 0.672 0 1.376 0 2.048 0 1.28 0 2.56 0 3.84 0 1.504 0 3.040 0 4.544 0 1.408 0 2.848 0 4.256 0 0.992 0 1.952 0 2.944 0 0.224 0 0.448 0 0.64 0 0.864 0.224 1.76 0.768 2.464 0.16 0.192 0.288 0.384 0.48 0.576s0.384 0.352 0.608 0.512c0.32 0.224 0.64 0.384 1.024 0.512 0.448 0.16 0.928 0.224 1.408 0.224 0.16 0 0.32 0 0.48 0 0.896 0 1.792 0 2.72 0 1.376 0 2.784 0 4.16 0 1.536 0 3.040 0 4.576 0 1.312 0 2.656 0 3.968 0 0.768 0 1.536 0 2.336 0 0.416 0 0.832-0.032 1.248-0.128 1.504-0.32 2.784-1.6 3.104-3.104 0.128-0.544 0.128-1.056 0.128-1.568 0-0.608 0-1.184 0-1.792 0-1.408 0-2.816 0-4.224 0-0.256 0-0.512 0-0.768 0-0.448-0.192-0.896-0.48-1.184s-0.768-0.512-1.184-0.48c-0.448 0.032-0.896 0.16-1.184 0.48-0.384 0.384-0.576 0.768-0.576 1.248v0z">
+               </path>
+               <path
+                  d="M32 11.232c0-0.8 0-1.568 0-2.368 0-1.248 0-2.528 0-3.776 0-0.288 0-0.576 0-0.864 0-0.896-0.768-1.696-1.696-1.696-0.8 0-1.568 0-2.368 0-1.248 0-2.528 0-3.776 0-0.288 0-0.576 0-0.864 0-0.448 0-0.896 0.192-1.184 0.48s-0.512 0.768-0.48 1.184c0.032 0.448 0.16 0.896 0.48 1.184s0.736 0.48 1.184 0.48c0.8 0 1.568 0 2.368 0 1.248 0 2.528 0 3.776 0 0.288 0 0.576 0 0.864 0-0.576-0.576-1.12-1.12-1.696-1.696 0 0.8 0 1.568 0 2.368 0 1.248 0 2.528 0 3.776 0 0.288 0 0.576 0 0.864 0 0.448 0.192 0.896 0.48 1.184s0.768 0.512 1.184 0.48c0.448-0.032 0.896-0.16 1.184-0.48 0.352-0.256 0.544-0.64 0.544-1.12v0z">
+               </path>
+               <path
+                  d="M15.040 21.888c0.16-0.16 0.288-0.288 0.448-0.448 0.384-0.384 0.8-0.8 1.184-1.184 0.608-0.608 1.184-1.184 1.792-1.792 0.704-0.704 1.44-1.44 2.176-2.176 0.8-0.8 1.568-1.568 2.368-2.368s1.6-1.6 2.4-2.4c0.736-0.736 1.504-1.504 2.24-2.24 0.64-0.64 1.248-1.248 1.888-1.888 0.448-0.448 0.896-0.896 1.344-1.344 0.224-0.224 0.448-0.416 0.64-0.64 0 0 0.032-0.032 0.032-0.032 0.32-0.32 0.48-0.768 0.48-1.184s-0.192-0.896-0.48-1.184c-0.32-0.288-0.736-0.512-1.184-0.48-0.512 0.032-0.928 0.16-1.248 0.48-0.16 0.16-0.288 0.288-0.448 0.448-0.384 0.384-0.8 0.8-1.184 1.184-0.608 0.608-1.184 1.184-1.792 1.792-0.704 0.704-1.44 1.44-2.176 2.176-0.8 0.8-1.568 1.568-2.368 2.368s-1.6 1.6-2.4 2.4c-0.736 0.736-1.504 1.504-2.24 2.24-0.64 0.64-1.248 1.248-1.888 1.888-0.448 0.448-0.896 0.896-1.344 1.344-0.224 0.224-0.448 0.416-0.64 0.64 0 0-0.032 0.032-0.032 0.032-0.32 0.32-0.48 0.768-0.48 1.184s0.192 0.896 0.48 1.184c0.32 0.288 0.736 0.512 1.184 0.48 0.48 0 0.928-0.16 1.248-0.48v0z">
+               </path>
+            </symbol>
+            <symbol id="icon-next" viewBox="0 0 32 32">
+               <title>next</title>
+               <path
+                  d="M2.304 18.304h14.688l-4.608 4.576c-0.864 0.864-0.864 2.336 0 3.232 0.864 0.864 2.336 0.864 3.232 0l8.448-8.48c0.864-0.864 0.864-2.336 0-3.232l-8.448-8.448c-0.448-0.448-1.056-0.672-1.632-0.672s-1.184 0.224-1.632 0.672c-0.864 0.864-0.864 2.336 0 3.232l4.64 4.576h-14.688c-1.248 0-2.304 0.992-2.304 2.272s1.024 2.272 2.304 2.272z">
+               </path>
+               <path
+                  d="M29.696 26.752c1.248 0 2.304-1.024 2.304-2.304v-16.928c0-1.248-1.024-2.304-2.304-2.304s-2.304 1.024-2.304 2.304v16.928c0.064 1.28 1.056 2.304 2.304 2.304z">
+               </path>
+            </symbol>
+            <symbol id="icon-prev" viewBox="0 0 32 32">
+               <title>prev</title>
+               <path
+                  d="M29.696 13.696h-14.688l4.576-4.576c0.864-0.864 0.864-2.336 0-3.232-0.864-0.864-2.336-0.864-3.232 0l-8.448 8.48c-0.864 0.864-0.864 2.336 0 3.232l8.448 8.448c0.448 0.448 1.056 0.672 1.632 0.672s1.184-0.224 1.632-0.672c0.864-0.864 0.864-2.336 0-3.232l-4.608-4.576h14.688c1.248 0 2.304-1.024 2.304-2.304s-1.024-2.24-2.304-2.24z">
+               </path>
+               <path
+                  d="M2.304 5.248c-1.248 0-2.304 1.024-2.304 2.304v16.928c0 1.248 1.024 2.304 2.304 2.304s2.304-1.024 2.304-2.304v-16.928c-0.064-1.28-1.056-2.304-2.304-2.304z">
+               </path>
+            </symbol>
+         </defs>
+      </svg>
+
+      <!-- STEP HISTORY -->
+      <div id="stepHistory" class="step">
+         <h2 style="font-size: 20px; color: var(--spotify-green); text-align:center;">Listening History</h2>
+         <div id="historyListDisplay"></div>
+         <button class="footer-btn" style="background: #333; color: white; margin-bottom: 10px;"
+            onclick="clearHistory()">Clear History</button>
+         <span class="back-link" onclick="showStep('step1')">← തിരികെ പോകുക</span>
+      </div>
+
+      <!-- STEP PREMIUM -->
+      <div id="stepPremium" class="step">
+         <div class="premium-box">
+            <h2 class="gold-txt"> 👑 Premium Plus (+)</h2>
+            <div id="lockMessage">
+               <p>പ്രൊഫൈൽ മാറ്റാനും പാട്ടുകൾ അപ്‌ലോഡ് ചെയ്യാനും പ്രീമിയം ആവശ്യമാണ്.</p>
+               <div style="background:#222; padding:15px; border-radius:10px; margin:10px 0;">
+                  <p>നിങ്ങൾ <b>₹49</b> താഴെ കാണുന്ന നമ്പറിലേക്ക് അയക്കുക:</p>
+                  <h3 class="gold-txt">9048368870</h3>
+                  <p style="font-size:11px; color:#888;">പണമയച്ച ശേഷം സ്ക്രീൻഷോട്ട് ഇതേ നമ്പറിലേക്ക് വാട്സാപ്പ് ചെയ്യുക.
+                  </p>
+               </div>
+               <input type="text" id="premiumKey" class="footer-btn"
+                  style="color:white; text-align:left; background:#333; border: 1px solid gold;"
+                  placeholder="Enter Activation Key">
+               <button class="footer-btn" style="background:gold;" onclick="checkPremiumKey()">Activate Now</button>
+            </div>
+
+            <div id="premiumTools" style="display:none;">
+               <p class="gold-txt">പ്രീമിയം ആക്റ്റിവേറ്റഡ്!</p>
+               <div style="text-align:left;">
+                  <label>Edit Profile Name:</label>
+                  <input type="text" id="profName" class="search-input" placeholder="Enter Name">
+                  <label>Upload Song URL:</label>
+                  <input type="text" id="upTitle" class="search-input" placeholder="Song Title">
+                  <input type="text" id="upUrl" class="search-input" placeholder="MP3 Link">
+                  <button class="footer-btn" onclick="addPremiumSong()">Add Song to List</button>
+               </div>
+            </div>
+         </div>
+         <span class="back-link" onclick="showStep('step1')"> ← തിരികെ പോകുക</span>
+      </div>
+
+      <!-- PARALLAX OVERLAY -->
+      <div id="parallaxOverlay"
+         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; background:#000;">
+         <iframe id="parallaxFrame" src="parallax.html" style="width:100%; height:100%; border:none;"></iframe>
+      </div>
+
+      <div id="stepGame" class="step" style="display:none;">
+         <div style="text-align:center; padding: 10px 0 5px;">
+            <button onclick="showStep('step0')" type="button"
+               style="background:#333; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:13px; font-weight:700; cursor:pointer;">←
+               Back</button>
+            <h3 style="color:#ff6b35; margin:8px 0 4px;">🎮 Toast Catcher</h3>
+            <p style="color:#888; font-size:12px; margin:0;">Click the flying toasts before they escape!</p>
+         </div>
+         <div style="display:flex; justify-content:center; align-items:center; padding: 8px 0 20px;">
+            <div style="border: 6px solid #67442b; border-radius: 16px; background: #67442b; max-width:100%;">
+               <svg id="gameCanvas" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                  width="450" height="560" fill="none" viewBox="0 0 450 680"
+                  style="border-radius:10px; user-select:none; display:block; max-width:100%; height:auto;">
+                  <path fill="#7DC8CF" d="M0 1h450v680H0z" />
+                  <path fill="#976F4A" d="M0 0h450v80H0z" />
+                  <path fill="#FDC571" d="M0 631h450v50H0z" />
+                  <path fill="#67442B" d="M0 74h450v6H0z" />
+                  <rect width="430" height="54" x="10" y="10" fill="#67442B" rx="12" />
+                  <path fill="#FFE2B4"
+                     d="M391.652 25.303c3.524-3.523 9.148-3.665 12.842-.427l.017-.016.352-.334a9.407 9.407 0 0 1 13.285 13.286l-.333.352-13.303 13.303-13.304-13.304.016-.017c-3.238-3.695-3.097-9.318.428-12.843Z" />
+                  <g fill="#FEDAA1" font="inherit">
+                     <text id="gameScore" x="25" y="46">00000000</text>
+                     <text id="gameLives" x="310" y="46"></text>
+                  </g>
+                  <path fill="#FEECBF"
+                     d="M104.139 183.699c1.5-19.5-32-23-32-1.5-15.5-5.5-20.5 13.5-12.5 16 14.5 0 43.5.5 55 .5 10.5-4-.5-22-10.5-15Zm295.5-2c1.642-21.263-33-24.5-34.5-3.5-18.5-6-24.258 16.956-15.5 19.682h60.837c11.495-4.362.111-23.815-10.837-16.182ZM93.078 379.908c1.792-23.22-34.939-29.209-41.439-2.209-16.5-8-22.677 16.903-13.12 19.88h66.384c12.543-4.763.121-26.007-11.825-17.671Z" />
+                  <g font-size="36" id="gameOverScreen" pointer-events="none" visibility="hidden">
+                     <text x="225" y="280" text-anchor="middle" stroke="#603719" stroke-width="10">GAME OVER</text>
+                     <text x="225" y="280" text-anchor="middle" fill="#f16f33">GAME OVER</text>
+                     <text id="gameFinalScore" x="225" y="330" text-anchor="middle" font-size="22" fill="white">Final
+                        Score: 0</text>
+                     <text x="225" y="375" text-anchor="middle" font-size="20" fill="#FDC571" style="cursor:pointer;"
+                        onclick="restartGame()">▶ Play Again</text>
+                  </g>
+                  <symbol id="toast2" width="95" height="57" viewBox="0 0 95 57">
+                     <path class="toast__wings" fill="#FDE2A9" stroke="#7F3412" stroke-linejoin="round" stroke-width="3"
+                        d="M3.793 18.165c.905-.484 1.938-.526 2.887-.399 1.88.252 4.141 1.27 6.375 2.527 3.967 2.234 8.385 5.539 11.558 8.103l1.279 1.048.105.096a1.5 1.5 0 0 1 .424.87l1.47 11.701a1.5 1.5 0 0 1-.432 1.254c-3.981 3.94-8.147 4.232-10.628 2.541-1.168-.796-2.067-2.187-1.735-3.753.053-.25.135-.483.24-.702-1.743-.454-3.15-1.018-4.257-1.658-1.747-1.01-2.903-2.31-3.22-3.799-.292-1.363.181-2.602 1.058-3.47-1.424-.708-2.823-1.57-4-2.646-2.349-2.147-3.818-5.157-2.921-9.21l.05-.2c.265-.997.838-1.817 1.747-2.303Zm85.793-2.258c-1.486-.17-3.23.45-4.847 1.238-2.93 1.426-6.42 3.904-9.438 6.2l-1.26.971-.133.116a1.5 1.5 0 0 0-.448 1.1l.251 12.107a1.5 1.5 0 0 0 1.44 1.468c3.919.158 6.967-.368 9.192-1.296 2.19-.913 3.742-2.294 4.306-3.937.288-.837.307-1.725.002-2.556-.304-.828-.892-1.499-1.647-1.973a5.05 5.05 0 0 0-.67-.351 23.515 23.515 0 0 0 2.936-2.553c1.003-1.038 1.868-2.154 2.475-3.29.6-1.126.998-2.366.924-3.61-.055-.913-.297-1.79-.868-2.481-.595-.72-1.4-1.06-2.215-1.153Z" />
+                     <path fill="#C7511B"
+                        d="M63.941.713c6.616-.394 12.298 4.65 12.692 11.266l.12 2.016a12.94 12.94 0 0 1-1.657 7.165l1.421 23.884a8 8 0 0 1-7.51 8.461l-34.86 2.074a8 8 0 0 1-8.461-7.511l-1.343-22.575a12.946 12.946 0 0 1-3.543-8.17l-.06-1.017c-.427-7.167 5.038-13.323 12.204-13.75L63.941.714Z" />
+                     <path fill="#FEBB63"
+                        d="M64.353 3.719a9 9 0 0 1 9.518 8.45l.177 2.969a10.949 10.949 0 0 1-1.721 6.587l1.39 23.368a5 5 0 0 1-4.694 5.288l-32.78 1.95a5 5 0 0 1-5.288-4.694l-1.362-22.894a10.953 10.953 0 0 1-2.882-6.789l-.058-.973c-.36-6.064 4.263-11.273 10.327-11.634L64.353 3.72Z" />
+                     <path stroke="#7F3412" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                        d="M49.28 31.137c2.615 1.848 5.61 1.67 7.488-.445" />
+                     <g class="toast__eyes">
+                        <ellipse cx="61.42" cy="25.123" fill="#7F3412" rx="2.5" ry="3.5"
+                           transform="rotate(-3.404 61.42 25.123)" />
+                        <ellipse cx="42.994" cy="26.502" fill="#7F3412" rx="2.5" ry="3.5"
+                           transform="rotate(-3.404 42.994 26.502)" />
+                     </g>
+                  </symbol>
+               </svg>
+            </div>
+         </div>
+      </div>
+
+   </div>
+
+   <style>
+      #gameCanvas .toast__wings {
+         animation: wings-flapping linear infinite 0.4s;
+         transform-origin: center 85%;
+         pointer-events: none;
+      }
+
+      #gameCanvas .toast__eyes {
+         animation: blink linear infinite 2s;
+      }
+
+      @keyframes wings-flapping {
+
+         0%,
+         100% {
+            scale: 1 1;
+         }
+
+         50% {
+            scale: 1 0.8;
+         }
+      }
+
+      @keyframes blink {
+
+         0%,
+         90% {
+            scale: 1 1;
+         }
+
+         100% {
+            scale: 1 0;
+         }
+      }
+
+      .toast-piece {
+         cursor: pointer;
+      }
+   </style>
+
+   <script>
+      var mdhGame = null;
+      function restartGame() {
+         if (mdhGame) mdhGame.destroy();
+         mdhGame = new MdhGame();
+      }
+      function initGameIfNeeded() {
+         if (!mdhGame) mdhGame = new MdhGame();
+      }
+      class MdhGame {
+         constructor() {
+            this.svg = document.getElementById('gameCanvas');
+            this.scoreEl = document.getElementById('gameScore');
+            this.livesEl = document.getElementById('gameLives');
+            this.finalScoreEl = document.getElementById('gameFinalScore');
+            this.gameOverEl = document.getElementById('gameOverScreen');
+            this.toasts = []; this.score = 0; this.remainingLives = 5;
+            this.gameOver = false; this.spawnTimer = null; this.rafId = null;
+            this.gameStartTime = performance.now();
+            this.loop = this.loop.bind(this);
+            this.spawnToast(); this.startSpawnTimer(); this.updateLives();
+            this.rafId = requestAnimationFrame(this.loop);
+         }
+         destroy() {
+            if (this.spawnTimer) clearInterval(this.spawnTimer);
+            if (this.rafId) cancelAnimationFrame(this.rafId);
+            this.toasts.forEach(function (t) { try { t.el.remove(); } catch (e) { } });
+            this.toasts = [];
+            var gos = document.getElementById('gameOverScreen');
+            if (gos) gos.setAttribute('visibility', 'hidden');
+         }
+         startSpawnTimer() {
+            if (this.spawnTimer) clearInterval(this.spawnTimer);
+            var elapsed = (performance.now() - this.gameStartTime) / 1000;
+            var interval = Math.max(500, 2000 - Math.floor(elapsed / 10) * 100);
+            var self = this;
+            this.spawnTimer = setInterval(function () { if (!self.gameOver) { self.spawnToast(); self.startSpawnTimer(); } }, interval);
+         }
+         spawnToast() {
+            if (this.gameOver) return;
+            var startX = Math.random() * 350 + 25;
+            var endX = Math.random() * 350 + 25;
+            var peakY = 200 + Math.random() * 50;
+            var toast = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+            toast.setAttribute('href', '#toast2');
+            toast.setAttribute('class', 'toast-piece');
+            toast.setAttribute('x', startX); toast.setAttribute('y', 680);
+            this.svg.appendChild(toast);
+            var obj = {
+               el: toast, startX: startX, endX: endX, startY: 680, peakY: peakY,
+               startTime: performance.now(), duration: 3000, clicked: false, upwardSpeed: -8, reachedBottom: false
+            };
+            var self = this;
+            toast.addEventListener('pointerdown', function () {
+               if (!self.gameOver && !obj.clicked) {
+                  self.score++; self.scoreEl.textContent = self.score.toString().padStart(8, '0'); obj.clicked = true;
+               }
+            });
+            this.toasts.push(obj);
+         }
+         checkGameOver() {
+            if (this.remainingLives <= 0) {
+               this.gameOver = true;
+               clearInterval(this.spawnTimer);
+               this.gameOverEl.setAttribute('visibility', 'visible');
+               this.finalScoreEl.textContent = 'Final Score: ' + this.score;
+            }
+         }
+         loop(timestamp) {
+            var self = this;
+            if (!this.gameOver) {
+               this.toasts = this.toasts.filter(function (t) {
+                  var progress = (timestamp - t.startTime) / t.duration;
+                  if (t.clicked) {
+                     var cy = parseFloat(t.el.getAttribute('y')) + t.upwardSpeed;
+                     t.el.setAttribute('y', cy); t.el.setAttribute('pointer-events', 'none');
+                     if (cy < -50) { t.el.remove(); return false; }
+                  } else {
+                     if (progress > 1) {
+                        if (!t.reachedBottom) { self.remainingLives--; self.updateLives(); self.checkGameOver(); t.reachedBottom = true; }
+                        t.el.remove(); return false;
+                     }
+                     var x = t.startX + (t.endX - t.startX) * progress;
+                     var y = t.startY - (4 * progress * (1 - progress)) * (t.startY - t.peakY);
+                     t.el.setAttribute('x', x); t.el.setAttribute('y', y);
+                  }
+                  return true;
+               });
+            }
+            this.rafId = requestAnimationFrame(this.loop);
+         }
+         updateLives() { this.livesEl.textContent = '❤️ '.repeat(this.remainingLives); }
+      }
+
+      // Patch showStep to start/stop game
+      document.addEventListener('DOMContentLoaded', function () {
+         var origShowStep = window.showStep;
+         window.showStep = function (id) {
+            origShowStep(id);
+            if (id === 'stepGame') { setTimeout(initGameIfNeeded, 100); }
+            else { if (mdhGame) { mdhGame.destroy(); mdhGame = null; } }
+         };
+      });
+   </script>
+
+   <!-- Parallax Overlay Controls -->
+   <script>
+      function openParallax() {
+         var overlay = document.getElementById('parallaxOverlay');
+         if (overlay) {
+            overlay.style.display = 'block';
+            // Reload iframe each time to reset scroll position
+            var frame = document.getElementById('parallaxFrame');
+            if (frame) frame.src = 'parallax.html';
+         }
+      }
+      function closeParallax() {
+         var overlay = document.getElementById('parallaxOverlay');
+         if (overlay) overlay.style.display = 'none';
+      }
+   </script>
+
+   <!-- Player Vue Instance -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+   <script>
+      new Vue({
+         el: "#app",
+         data() {
+            return {
+               audio: null,
+               circleLeft: null,
+               barWidth: null,
+               duration: null,
+               currentTime: null,
+               isTimerPlaying: false,
+               tracks: [
+                  { name: "Mekanin Sahibi", artist: "Norm Ender", cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/1.jpg", source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/1.mp3", url: "https://www.youtube.com/watch?v=z3wAjJXbYzA", favorited: false },
+                  { name: "Everybody Knows", artist: "Leonard Cohen", cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/2.jpg", source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/2.mp3", url: "https://www.youtube.com/watch?v=Lin-a2lTelg", favorited: true },
+                  { name: "Extreme Ways", artist: "Moby", cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/3.jpg", source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/3.mp3", url: "https://www.youtube.com/watch?v=ICjyAe9S54c", favorited: false },
+                  { name: "Butterflies", artist: "Sia", cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/4.jpg", source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/4.mp3", url: "https://www.youtube.com/watch?v=kYgGwWYOd9Y", favorited: false },
+                  { name: "The Final Victory", artist: "Haggard", cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/5.jpg", source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/5.mp3", url: "https://www.youtube.com/watch?v=0WlpALnQdN8", favorited: true },
+                  { name: "Genius ft. Sia, Diplo, Labrinth", artist: "LSD", cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/6.jpg", source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/6.mp3", url: "https://www.youtube.com/watch?v=HhoATZ1Imtw", favorited: false },
+                  { name: "The Comeback Kid", artist: "Lindi Ortega", cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/7.jpg", source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/7.mp3", url: "https://www.youtube.com/watch?v=me6aoX0wCV8", favorited: true },
+                  { name: "Overdose", artist: "Grandson", cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/8.jpg", source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/8.mp3", url: "https://www.youtube.com/watch?v=00-Rl3Jlx-o", favorited: false },
+                  { name: "Rag'n'Bone Man", artist: "Human", cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/9.jpg", source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/9.mp3", url: "https://www.youtube.com/watch?v=L3wKzyIN1yk", favorited: false }
+               ],
+               currentTrack: null,
+               currentTrackIndex: 0,
+               transitionName: null
+            };
+         },
+         methods: {
+            play() {
+               if (this.audio.paused) {
+                  this.audio.play();
+                  this.isTimerPlaying = true;
+               } else {
+                  this.audio.pause();
+                  this.isTimerPlaying = false;
+               }
+            },
+            generateTime() {
+               let width = (100 / this.audio.duration) * this.audio.currentTime;
+               this.barWidth = width + "%";
+               this.circleLeft = width + "%";
+               let durmin = Math.floor(this.audio.duration / 60);
+               let dursec = Math.floor(this.audio.duration - durmin * 60);
+               let curmin = Math.floor(this.audio.currentTime / 60);
+               let cursec = Math.floor(this.audio.currentTime - curmin * 60);
+               if (durmin < 10) { durmin = "0" + durmin; }
+               if (dursec < 10) { dursec = "0" + dursec; }
+               if (curmin < 10) { curmin = "0" + curmin; }
+               if (cursec < 10) { cursec = "0" + cursec; }
+               this.duration = durmin + ":" + dursec;
+               this.currentTime = curmin + ":" + cursec;
+            },
+            updateBar(x) {
+               let progress = this.$refs.progress;
+               let maxduration = this.audio.duration;
+               let rect = progress.getBoundingClientRect();
+               let position = x - rect.left;
+               let percentage = (100 * position) / rect.width;
+               if (percentage > 100) percentage = 100;
+               if (percentage < 0) percentage = 0;
+               this.barWidth = percentage + "%";
+               this.circleLeft = percentage + "%";
+               this.audio.currentTime = (maxduration * percentage) / 100;
+               this.audio.play();
+            },
+            clickProgress(e) {
+               this.isTimerPlaying = true;
+               this.audio.pause();
+               this.updateBar(e.pageX);
+            },
+            prevTrack() {
+               this.transitionName = "scale-in";
+               if (this.currentTrackIndex > 0) {
+                  this.currentTrackIndex--;
+               } else {
+                  this.currentTrackIndex = this.tracks.length - 1;
+               }
+               this.currentTrack = this.tracks[this.currentTrackIndex];
+               this.resetPlayer();
+            },
+            nextTrack() {
+               this.transitionName = "scale-out";
+               if (this.currentTrackIndex < this.tracks.length - 1) {
+                  this.currentTrackIndex++;
+               } else {
+                  this.currentTrackIndex = 0;
+               }
+               this.currentTrack = this.tracks[this.currentTrackIndex];
+               this.resetPlayer();
+            },
+            resetPlayer() {
+               this.barWidth = 0;
+               this.circleLeft = 0;
+               this.audio.currentTime = 0;
+               this.audio.src = this.currentTrack.source;
+               setTimeout(() => {
+                  if (this.isTimerPlaying) {
+                     this.audio.play();
+                  } else {
+                     this.audio.pause();
+                  }
+               }, 300);
+            },
+               favorite() {
+                  this.tracks[this.currentTrackIndex].favorited = !this.tracks[this.currentTrackIndex].favorited;
+               },
+               setPlaylist(list, index = 0) {
+                  if (!Array.isArray(list) || list.length === 0) return;
+                  this.tracks = list;
+                  this.currentTrackIndex = Math.min(Math.max(index, 0), this.tracks.length - 1);
+                  this.currentTrack = this.tracks[this.currentTrackIndex];
+                  this.resetPlayer();
+               }
+            },
+         created() {
+            let vm = this;
+            window.playerVm = this;
+            this.currentTrack = this.tracks[0];
+            this.audio = new Audio();
+            this.audio.src = this.currentTrack.source;
+            this.audio.ontimeupdate = function () { vm.generateTime(); };
+            this.audio.onloadedmetadata = function () { vm.generateTime(); };
+            this.audio.onended = function () {
+               vm.nextTrack();
+               this.isTimerPlaying = true;
+            };
+            for (let index = 0; index < this.tracks.length; index++) {
+               const element = this.tracks[index];
+               let link = document.createElement('link');
+               link.rel = "prefetch";
+               link.href = element.cover;
+               link.as = "image";
+               document.head.appendChild(link);
+            }
+         }
+      });
+   </script>
+
+   <!-- External Scripts -->
+   <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+   <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+   <script src="mdh.js"></script>
+</body>
+
+</html>
+
+
